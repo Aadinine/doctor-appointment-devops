@@ -777,6 +777,11 @@ def appointment_bill(appointment_id):
         flash('Error loading appointment details', 'error')
         return redirect(url_for('dashboard'))
 
+# Add this health check endpoint for Kubernetes
+@app.route('/health')
+def health():
+    return jsonify({"status": "healthy"}), 200
+
 if __name__ == '__main__':
     print("🚀 Starting appointment system...")
     
