@@ -1,0 +1,47 @@
+---
+- name: Deploy Doctor Appointment App to Kubernetes
+  hosts: localhost
+  gather_facts: no
+  
+  tasks:
+    - name: Create Kubernetes namespace
+      kubernetes.core.k8s:
+        name: doctor-app
+        api_version: v1
+        kind: Namespace
+        state: present
+    
+    - name: Create MongoDB secret
+      kubernetes.core.k8s:
+        state: present
+        definition:
+          apiVersion: v1
+          kind: Secret
+          metadata:
+            name: mongo-secret
+            namespace: doctor-app
+          type: Opaque
+          stringData:
+            uri: "{{ mongodb_uri }}"
+    
+    - name: Apply deployment
+      kubernetes.core.k8s:
+        state: present
+        src: ../k8s/deployment.yaml
+        namespace: doctor-app
+    
+    - name: Apply service
+      kubernetes.core.k8s:
+        state: present
+        src: ../k8s/service.yaml
+        namespace: doctor-app
+    
+    - name: Wait for deployment
+      kubernetes.core.k8s_info:
+        kind: Deployment
+        name: doctor-app
+        namespace: doctor-app
+      register: deployment_status
+      until: deployment_status.resources[0].status.ready_replicas == deployment_status.resources[0].spec.replicas
+      retries: 10
+      delay: 10
