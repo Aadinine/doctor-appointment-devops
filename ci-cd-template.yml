@@ -1,5 +1,4 @@
-# CI/CD Pipeline (saved as template - needs GitHub secrets setup)
-# To activate: rename to ci-cd.yml and set up GitHub secrets
+name: CI/CD Pipeline
 
 on:
   push:
